@@ -18,10 +18,12 @@ public class OnPlayerJoinEvent implements Listener {
 
     @EventHandler
     public void onServerKick(ServerKickEvent event) {
-        ServerInfo lobby = plugin.getProxy().getServerInfo("lobby");
-        if(lobby != null) {
-            event.setCancelled(true);
-            event.setCancelServer(lobby);
+        if (event.getReason().toLegacyText().contains("closed")) {
+            ServerInfo lobby = plugin.getProxy().getServerInfo("lobby");
+            if (lobby != null) {
+                event.setCancelled(true);
+                event.setCancelServer(lobby);
+            }
         }
     }
 
