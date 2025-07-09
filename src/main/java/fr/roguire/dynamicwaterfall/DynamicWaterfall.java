@@ -16,7 +16,6 @@ import okhttp3.Response;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.InetSocketAddress;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,7 +27,8 @@ public class DynamicWaterfall extends Plugin {
     private ProxyServer server;
     private Logger logger;
     private OkHttpClient client;
-    private Request request;;
+    private Request request;
+    ;
     private final Set<String> knownServers = new HashSet<>();
     private final Gson gson = new Gson();
     private ScheduledTask refreshTask;
@@ -41,13 +41,13 @@ public class DynamicWaterfall extends Plugin {
         client = new OkHttpClient();
         request = new Request.Builder().url("http://localhost:25550/get-servers").build();
         getLogger().info("DynamicWaterfall is enabled");
-        refreshTask = server.getScheduler().schedule(this, this::checkServers,0,2, TimeUnit.SECONDS);
+        refreshTask = server.getScheduler().schedule(this, this::checkServers, 0, 2, TimeUnit.SECONDS);
         server.getPluginManager().registerListener(this, new OnPlayerJoinEvent(this));
     }
 
     private void checkServers() {
         List<ServerData> activeServers = fetchServers();
-        if(activeServers == null) {
+        if (activeServers == null) {
             logger.info("No active servers found");
             return;
         }
@@ -69,28 +69,29 @@ public class DynamicWaterfall extends Plugin {
         });
     }
 
-    public void addServer(String name, int port){
-        ServerInfo serverInfo = this.server.constructServerInfo(name, new InetSocketAddress("localhost", port), "",true);
+    public void addServer(String name, int port) {
+        ServerInfo serverInfo = this.server.constructServerInfo(name, new InetSocketAddress("localhost", port), "", true);
         server.getConfig().addServer(serverInfo);
         knownServers.add(name);
-        logger.info("Serveur ajouté: "+ serverInfo.getName());
+        logger.info("Serveur ajouté: " + serverInfo.getName());
     }
 
     private void removeServer(String name) {
         ServerInfo server = this.server.getServerInfo(name);
-        if(server != null){
+        if (server != null) {
             this.server.getConfig().removeServer(server);
         }
-        logger.info("Serveur supprimé : "+ name);
+        logger.info("Serveur supprimé : " + name);
     }
 
-    private List<ServerData> fetchServers(){
-        try(Response response = client.newCall(request).execute()) {
-            if(!response.isSuccessful()) return null;
-            Type listType = new TypeToken<List<ServerData>>() {}.getType();
-            if(response.body() == null) return null;
+    private List<ServerData> fetchServers() {
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) return null;
+            Type listType = new TypeToken<List<ServerData>>() {
+            }.getType();
+            if (response.body() == null) return null;
             JsonObject jsonResponse = JsonParser.parseString(response.body().string()).getAsJsonObject();
-            if(jsonResponse.get("code").getAsInt() != 200) return null;
+            if (jsonResponse.get("code").getAsInt() != 200) return null;
             String message = jsonResponse.get("message").getAsString();
             return gson.fromJson(message, listType);
         } catch (IOException e) {
@@ -104,7 +105,7 @@ public class DynamicWaterfall extends Plugin {
 
         @Override
         public String toString() {
-            return "ServerData{"+name+","+port+"}";
+            return "ServerData{" + name + "," + port + "}";
         }
     }
 
